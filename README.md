@@ -4,10 +4,10 @@ Simplex Algorithm and Naive Method For Basic Feasible Solution implemented in C+
 ## 1. 组成
 
 ### 1.1. Naive
-暴力枚举C(n, m)个基本可行解，计算代价求最大值。 \\
+暴力枚举C(n, m)个基本可行解，计算代价求最大值。
 
 ### 1.2. Simplex
-单纯形法，模拟单纯形表格计算。 \\
+单纯形法，模拟单纯形表格计算。
 
 ## 2. 调用
 
