@@ -44,8 +44,9 @@ int main() {
                 for (const auto &[k, v] : kv) {
                     std::cout << "x_" << k << " = " << v << std::endl;
                 }
-                std::cout << "z = " << z << '\n' << std::endl;
+                std::cout << "z = " << z << std::endl;
             }
+            std::cout << std::endl;
         }
         {
             auto [s, kv, z] = simplex(A, b, coef);
@@ -54,8 +55,9 @@ int main() {
                 for (const auto &[k, v] : kv) {
                     std::cout << "x_" << k << " = " << v << std::endl;
                 }
-                std::cout << "z = " << z << '\n' << std::endl;
+                std::cout << "z = " << z << std::endl;
             }
+            std::cout << std::endl;
         }
         std::cout << std::string(30, '=') << std::endl;
     }
