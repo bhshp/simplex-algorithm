@@ -141,14 +141,12 @@ answer_type naive(const matrix<number> &A, const col<number> &b, const row<numbe
     return res.has_value() ? res.value() : answer_type{NOT_FEASIBLE, row<kv_type>{}, std::numeric_limits<number::value_type>::min()};
 }
 
-answer_type simplex(const matrix<number> &mat, const col<number> &target, const row<number> &c) {
-    row<number> sigma(c.size());
+answer_type simplex(matrix<number> a, col<number> b, const row<number> &c) {
+    size_t m = a.size(), n = c.size();
+    row<number> sigma(n);
     row<size_t> xj;
-    col<number> b = target;
-    matrix<number> a = mat;
     number z;
-    size_t m = mat.size();
-    for (size_t i = c.size() - m; i < c.size(); i++) {
+    for (size_t i = n - m; i < n; i++) {
         xj.push_back(i);
     }
     answer state = NOT_FEASIBLE;
@@ -157,41 +155,40 @@ answer_type simplex(const matrix<number> &mat, const col<number> &target, const 
         for (size_t i = 0; i < m; i++) {
             z += (c[xj[i]] * b[i]);
         }
-        bool all_non_pos = true, zero = false;
-        for (size_t i = 0; i < c.size(); i++) {
-            sigma[i] = c[i];
-            for (size_t j = 0; j < m; j++) {
-                sigma[i] -= (a[j][i] * c[xj[j]]);
-            }
-            bool in = false;
-            for (size_t j = 0; j < m; j++) {
-                if (xj[j] == i) {
-                    in = true;
-                    break;
+        bool all_le_0 = true, zero = false, should_break = false;
+        for (size_t j = 0; j < n; j++) {
+            sigma[j] = c[j];
+            bool in_base = false;
+            for (size_t i = 0; i < m; i++) {
+                sigma[j] -= (c[xj[i]] * a[i][j]);
+                if (xj[i] == j) {
+                    in_base = true;
                 }
             }
-            if (in) {
+            if (in_base) {
                 continue;
-            } else if (sigma[i] > 0) {
-                all_non_pos = false;
-                bool flag = true;
-                for (size_t j = 0; j < m; j++) {
-                    if (a[j][i] > 0) {
-                        flag = false;
+            }
+            if (sigma[j] > 0) {
+                all_le_0 = false;
+                bool flag = false;
+                for (size_t i = 0; i < m; i++) {
+                    if (a[i][j] > 0) {
+                        flag = true;
                         break;
                     }
                 }
-                if (flag) {
+                if (!flag) {
+                    should_break = true;
                     break;
                 }
-            } else if (sigma[i] == 0) {
+            } else if (sigma[j] == 0) {
                 zero = true;
             }
         }
-        if (all_non_pos) {
-            state = zero ? INFINITE_OPTIMAL : OPTIMAL;
+        if (should_break) {
             break;
-        } else if (state == 3) {
+        } else if (all_le_0) {
+            state = zero ? INFINITE_OPTIMAL : OPTIMAL;
             break;
         }
         size_t index = std::max_element(std::cbegin(sigma), std::cend(sigma)) - std::cbegin(sigma);
@@ -199,15 +196,23 @@ answer_type simplex(const matrix<number> &mat, const col<number> &target, const 
         size_t row_to_choose = 0;
         number minimum;
         for (size_t i = 0; i < m; i++) {
-            if (a[i][index] != 0 && b[i] / a[i][index] >= 0) {
+            if (a[i][index] == 0) {
+                continue;
+            }
+            number result = b[i] / a[i][index];
+            if (result >= 0) {
                 if (!feasible) {
                     feasible = true;
-                    minimum = b[i] / a[i][index];
+                    minimum = result;
                     row_to_choose = i;
                 } else {
-                    if (minimum > b[i] / a[i][index]) {
-                        minimum = b[i] / a[i][index];
+                    if (minimum > result) {
+                        minimum = result;
                         row_to_choose = i;
+                    } else if (minimum == result) {
+                        if (rand() & 1) {
+                            row_to_choose = i;
+                        }
                     }
                 }
             }

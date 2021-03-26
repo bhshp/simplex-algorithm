@@ -17,4 +17,4 @@ run:
 
 .PHONY: all
 all:
-	make clean && make && ./$(target)
+	make && ./$(target) && make clean
